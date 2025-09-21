@@ -1,0 +1,23 @@
+{
+  "name": "lab-1-field-mask",
+  "version": "1.0.0",
+  "description": "Лабораторная работа #1: Field Mask — TypeScript project",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "test": "ts-node src/index.ts",
+    "test:runtime": "ts-node src/tests-runtime/runTests.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^18.19.127",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "ts-jest": "^29.4.4"
+  }
+}
