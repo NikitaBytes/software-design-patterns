@@ -7,11 +7,12 @@ import { studentToJSON } from "../utils/studentToJSON";
 import { unionMasks, intersectMasks, invertMask } from "../utils/maskOps";
 
 describe("StudentDatabase и маски", () => {
+    // определение отдельного теста
     test("Создание и добавление студентов", () => {
         const db = new StudentDatabase();
-        const student1 = new Student(1, "Иван", 3.5, 20, StudentStatus.Active);
-        const student2 = new Student(2, "Мария", 4.0, 21, StudentStatus.Active);
-        const student3 = new Student(3, "Иван", 3.8, 22, StudentStatus.Graduated);
+        const student1 = { id: 1, name: "Иван", gpa: 3.5, age: 20, status: StudentStatus.Active };
+        const student2 = { id: 2, name: "Мария", gpa: 4.0, age: 21, status: StudentStatus.Active };
+        const student3 = { id: 3, name: "Иван", gpa: 3.8, age: 22, status: StudentStatus.Graduated };
         db.add(student1);
         db.add(student2);
         db.add(student3);
@@ -20,9 +21,9 @@ describe("StudentDatabase и маски", () => {
 
     test("Поиск по имени", () => {
         const db = new StudentDatabase();
-        db.add(new Student(1, "Иван", 3.5, 20, StudentStatus.Active));
-        db.add(new Student(2, "Мария", 4.0, 21, StudentStatus.Active));
-        db.add(new Student(3, "Иван", 3.8, 22, StudentStatus.Graduated));
+        db.add({ id: 1, name: "Иван", gpa: 3.5, age: 20, status: StudentStatus.Active });
+        db.add({ id: 2, name: "Мария", gpa: 4.0, age: 21, status: StudentStatus.Active });
+        db.add({ id: 3, name: "Иван", gpa: 3.8, age: 22, status: StudentStatus.Graduated });
         const ivans = db.findByName("Иван");
         expect(ivans.length).toBe(2);
         expect(ivans[0].name).toBe("Иван");
@@ -30,7 +31,7 @@ describe("StudentDatabase и маски", () => {
     });
 
     test("Маска полей (boolean)", () => {
-        const mask = new FieldMask(true, true, false, false, false);
+        const mask = { id: true, name: true, gpa: false, age: false, status: false };
         expect(mask.id).toBe(true);
         expect(mask.name).toBe(true);
         expect(mask.gpa).toBe(false);
@@ -50,10 +51,35 @@ describe("StudentDatabase и маски", () => {
 
     test("Слияние по маске", () => {
         const db2 = new StudentDatabase();
-        db2.add(new Student(1, "Петр", 3.0, 20, StudentStatus.Active));
-        db2.add(new Student(2, "Петр", 3.5, 20, StudentStatus.Active));
-        db2.add(new Student(3, "Анна", 4.0, 21, StudentStatus.Active));
-        const mergeMask = new FieldMask(false, true, false, true, false);
+        db2.add({
+            id: 1,
+            name: "Петр",
+            gpa: 3.0,
+            age: 20,
+            status: StudentStatus.Active,
+        })
+        db2.add({
+            id: 1,
+            name: "Петр",
+            gpa: 3.0,
+            age: 20,
+            status: StudentStatus.Active,
+        });
+        db2.add({
+            id: 2,
+            name: "Петр",
+            gpa: 3.5,
+            age: 20,
+            status: StudentStatus.Active,
+        });
+        db2.add({
+            id: 3,
+            name: "Анна",
+            gpa: 4.0,
+            age: 21,
+            status: StudentStatus.Active,
+        });
+        const mergeMask = { id: false, name: true, gpa: false, age: true, status: false };
         db2.mergeByMask(mergeMask);
         const allAfterMerge = db2.getAll();
         expect(allAfterMerge.length).toBe(2);
@@ -61,11 +87,11 @@ describe("StudentDatabase и маски", () => {
 
     test("Копирование полей по маске", () => {
         const db3 = new StudentDatabase();
-        db3.add(new Student(1, "Олег", 2.5, 19, StudentStatus.Active));
-        db3.add(new Student(2, "Олег", 3.0, 20, StudentStatus.Inactive));
-        const sourceStudent = new Student(99, "Олег", 4.5, 25, StudentStatus.Graduated);
-        const compareMask = new FieldMask(false, true, false, false, false);
-        const copyMask = new FieldMask(false, false, true, true, true);
+        db3.add({ id: 1, name: "Олег", gpa: 2.5, age: 19, status: StudentStatus.Active });
+        db3.add({ id: 2, name: "Олег", gpa: 3.0, age: 20, status: StudentStatus.Inactive });
+        const sourceStudent = { id: 99, name: "Олег", gpa: 4.5, age: 25, status: StudentStatus.Graduated };
+        const compareMask = { id: false, name: true, gpa: false, age: false, status: false };
+        const copyMask = { id: false, name: false, gpa: true, age: true, status: true };
         db3.copyFieldsByMask(compareMask, sourceStudent, copyMask);
         const updated = db3.getAll();
         expect(updated[0].gpa).toBe(4.5);
@@ -74,8 +100,8 @@ describe("StudentDatabase и маски", () => {
     });
 
     test("JSON преобразование с маской", () => {
-        const student1 = new Student(1, "Иван", 3.5, 20, StudentStatus.Active);
-        const jsonMask = new FieldMask(true, true, false, false, true);
+        const student1 = { id: 1, name: "Иван", gpa: 3.5, age: 20, status: StudentStatus.Active };
+        const jsonMask = { id: true, name: true, gpa: false, age: false, status: true };
         const json = studentToJSON(student1, jsonMask);
         expect(json.id).toBe(1);
         expect(json.name).toBe("Иван");
@@ -84,8 +110,8 @@ describe("StudentDatabase и маски", () => {
     });
 
     test("Комбинирование масок", () => {
-        const mask1 = new FieldMask(true, true, false, false, false);
-        const mask2 = new FieldMask(false, true, true, false, false);
+        const mask1 = { id: true, name: true, gpa: false, age: false, status: false };
+        const mask2 = { id: false, name: true, gpa: true, age: false, status: false };
         const union = unionMasks(mask1, mask2);
         expect(union.id).toBe(true);
         expect(union.name).toBe(true);

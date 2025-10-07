@@ -1,10 +1,19 @@
-
 // АБСТРАКЦИЯ БАЗЫ ДАННЫХ
 
 import { Student } from '../domain/Student';
 import { FieldMask } from '../masks/FieldMask';
+
+function isEqualByMask(a: Student, b: Student, mask: FieldMask): boolean {
+    if (mask.id && a.id !== b.id) return false;
+    if (mask.name && a.name !== b.name) return false;
+    if (mask.gpa && Math.abs(a.gpa - b.gpa) > 0.01) return false;
+    if (mask.age && a.age !== b.age) return false;
+    if (mask.status && a.status !== b.status) return false;
+    return true;
+}
+
 export class StudentDatabase {
-    // Массив для хранения студентов
+    // Массив для хранения студентов.  поле
     private students: Student[] = [];
     
     /**
@@ -12,6 +21,7 @@ export class StudentDatabase {
      * @param student - Студент для добавления
      */
     add(student: Student): void {
+        // Тип void означает, что метод ничего не возвращает, только добавляет студента в массив
         this.students.push(student);
     }
     
@@ -33,49 +43,38 @@ export class StudentDatabase {
     }
     
     /**
-     * Слияние объектов с одинаковыми значениями полей согласно маске
-     * @param mask - Маска для определения полей сравнения
+     * Объединить объекты с одинаковыми значениями полей согласно маске
+     * @param mask - Маска, определяющая, какие поля сравнивать
      */
     mergeByMask(mask: FieldMask): void {
         const merged: Student[] = [];
         const used = new Set<number>();
         
         for (let i = 0; i < this.students.length; i++) {
-            // Пропускаем уже обработанные
+            // Пропустить объекты, которые уже были объединены
             if (used.has(i)) continue;
             
             const current = this.students[i];
             const group: Student[] = [current];
             used.add(i);
             
-            // Ищем похожие объекты
             for (let j = i + 1; j < this.students.length; j++) {
                 if (used.has(j)) continue;
                 
                 const other = this.students[j];
                 
-                // Сравниваем по маске
-                let equal = true;
-                if (mask.id && current.id !== other.id) equal = false;
-                if (mask.name && current.name !== other.name) equal = false;
-                if (mask.gpa && current.gpa !== other.gpa) equal = false;
-                if (mask.age && current.age !== other.age) equal = false;
-                if (mask.status && current.status !== other.status) equal = false;
-                
-                if (equal) {
-                    group.push(other);
-                    used.add(j);
+                if (isEqualByMask(current, other, mask)) {
+                    group.push(other); // Добавить похожий объект в группу
+                    used.add(j); // Отметить объект как объединённый
                 }
             }
             
-            // Если в группе больше одного элемента - сливаем
             if (group.length > 1) {
-                // Берем первый объект как основу
+                const averageGpa = group.reduce((sum, s) => sum + s.gpa, 0) / group.length;
                 const mergedStudent = new Student(
                     current.id,
                     current.name,
-                    // Для GPA берем среднее значение
-                    group.reduce((sum, s) => sum + s.gpa, 0) / group.length,
+                    averageGpa,
                     current.age,
                     current.status
                 );
@@ -97,15 +96,8 @@ export class StudentDatabase {
     copyFieldsByMask(compareMask: FieldMask, source: Student, copyMask: FieldMask): void {
         this.students.forEach(student => {
             // Проверяем соответствие по маске сравнения
-            let match = true;
-            if (compareMask.id && student.id !== source.id) match = false;
-            if (compareMask.name && student.name !== source.name) match = false;
-            if (compareMask.gpa && Math.abs(student.gpa - source.gpa) > 0.01) match = false;
-            if (compareMask.age && student.age !== source.age) match = false;
-            if (compareMask.status && student.status !== source.status) match = false;
-            
-            // Если объект подходит - копируем поля согласно copyMask
-            if (match) {
+            if (isEqualByMask(student, source, compareMask)) {
+                // Если объект подходит копируем поля согласно copyMask
                 if (copyMask.id) student.id = source.id;
                 if (copyMask.name) student.name = source.name;
                 if (copyMask.gpa) student.gpa = source.gpa;
