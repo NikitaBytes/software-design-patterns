@@ -42,6 +42,16 @@ const stopIfDraft = () => (ctx: PostContext) => {
 };
 
 /**
+ * Стратегия изменения содержимого поста.
+ * @param appendText - текст для добавления к содержимому
+ */
+const appendContent = (appendText: string) => (ctx: PostContext) => {
+  if (!ctx.post.content) ctx.post.content = "";
+  ctx.post.content += appendText;
+  ctx.log.push(`ContentAppended: "${appendText}"`);
+};
+
+/**
  * Набор шагов для работы с PostContext.
  */
 export const PostSteps = {
@@ -59,6 +69,9 @@ export const PostSteps = {
 
   StopIfDraft: (): IPipelineStep<PostContext> =>
     new FunctionStep("StopIfDraft", stopIfDraft()),
+
+  AppendContent: (appendText: string): IPipelineStep<PostContext> =>
+    new FunctionStep(`AppendContent("${appendText}")`, appendContent(appendText)),
 };
 
 /**

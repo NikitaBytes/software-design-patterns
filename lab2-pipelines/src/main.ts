@@ -17,7 +17,7 @@ import type { SeminarContext } from "./contexts/seminar";
  */
 function demoPostPipeline() {
   const ctx: PostContext = {
-    post: { title: "ZNAPSTER launch", author: undefined, previousAuthors: [] },
+    post: { title: "ZNAPSTER launch", author: undefined, previousAuthors: [], content: "" },
     log: [],
   };
 
@@ -25,6 +25,7 @@ function demoPostPipeline() {
     PostSteps.StopIfDraft(),
     PostSteps.ChangeAuthor("Nikita"),
     PostSteps.ChangeTitle("ZNAPSTER — Web3 mini-app"),
+    PostSteps.AppendContent("Первый релиз ZNAPSTER! "), // добавляем изменение данных
     PRINT_POST_SINGLETON,             // singleton
     PostSteps.PrintAuthors(),
   ]);

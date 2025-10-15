@@ -8,6 +8,8 @@ export type Post = {
   author?: string;
   /** История авторов */
   previousAuthors: string[];
+  /** Содержимое поста */
+  content: string; // добавлено поле для содержимого поста
 };
 
 /**
