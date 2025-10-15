@@ -1,4 +1,4 @@
-import type { IPipelineStep, Introspectable } from "./types";
+import type { IPipelineStep } from "./types";
 
 /**
  * Универсальный шаг конвейера, реализующий IPipelineStep<T>.
