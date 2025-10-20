@@ -3,8 +3,8 @@ import type { City, Home, Citizen } from "../models/immutable";
 import { validateCityModel, ValidationError } from "./validation";
 import type { IHomeBuilder, ICitizenBuilder } from "./types";
 
-// Простая "подсказка места" — передаём вручную в .source(), но можно авто:
-const captureHint = () => undefined; // оставить вручную — стабильнее
+// Простая подсказка места передаём вручную в .source(), но можно авто
+const captureHint = () => undefined; 
 
 type Defaults = {
   citizenAge?: number;
