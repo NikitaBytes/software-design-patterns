@@ -13,7 +13,7 @@ function demo() {
   const h1 = b.home(h => h.address("Str. 123").source("main:home#1"));
   const homeIndex = h1.index();
 
-  // Глобальные дефолты через scope (из видео идея "скоупов")
+  // Глобальные дефолты через scope
   b.scope({ citizenAge: 32 }, () => {
     // Citizen #0 — fluent + делегат
     const john = b.citizen(c =>
